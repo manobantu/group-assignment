@@ -78,6 +78,6 @@ Sample queries are provided in the `answers.sql` file.
 
 Please list your names here (edit this section before submitting):
 
-- 👤 Lithemba — Group Lead
+- 👤 Lithemba Njisane — Group Lead
 - 👤 Cecil Bezale
 - 👤 Odoyo Jewell
