@@ -275,3 +275,84 @@ SET DEFAULT ROLE 'viewer_role' TO 'odoyo'@'localhost';
 
 -- Apply privilege changes
 FLUSH PRIVILEGES;
+
+
+
+
+
+
+
+
+SELECT
+    b.title AS book_title,
+    a.author_name,
+    l.language_name
+FROM book b
+JOIN book_author ba ON b.book_id = ba.book_id
+JOIN author a ON ba.author_id = a.author_id
+JOIN book_languages bl ON b.book_id = bl.book_id
+
+SELECT
+    c.customer_id,
+    CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
+    a.address_line1,
+    a.address_line2,
+    co.country_id,
+    ast.address_status_name
+FROM customers c
+JOIN customer_address ca ON c.customer_id = ca.customer_id
+JOIN address a ON ca.address_id = a.address_id
+JOIN country co ON a.country_id = co.country_id
+JOIN address_status ast ON ca.address_status_id = ast.address_status_id;
+
+
+SELECT
+    o.order_id,
+    CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
+    sm.method_name,
+    os.status_value,
+    oh.order_value,
+    o.order_date,
+    o.total_amount
+FROM orders o
+JOIN customers_orders co ON o.order_id = co.order_id
+JOIN customers c ON co.customer_id = c.customer_id
+JOIN shipping_method sm ON o.method_id = sm.method_id
+JOIN order_status os ON o.status_id = os.status_id
+JOIN order_history oh ON o.history_id = oh.history_id;
+
+SELECT
+    b.title,
+    SUM(ol.price) AS total_sales,
+    COUNT(*) AS units_sold
+FROM book b
+JOIN order_line ol ON b.book_id = ol.book_id
+GROUP BY b.title;
+
+SELECT
+    CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
+    b.title,
+    ol.price
+FROM customers c
+JOIN customers_orders co ON c.customer_id = co.customer_id
+JOIN order_line ol ON co.cust_order_id = ol.cust_order_id
+JOIN book b ON ol.book_id = b.book_id;
+
+SELECT
+    CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
+    COUNT(co.order_id) AS number_of_orders
+FROM customers c
+JOIN customers_orders co ON c.customer_id = co.customer_id
+GROUP BY c.customer_id;
+
+
+SELECT
+    o.order_id,
+    b.title,
+    ol.price,
+    o.total_amount
+FROM orders o
+JOIN customers_orders co ON o.order_id = co.order_id
+JOIN order_line ol ON co.cust_order_id = ol.cust_order_id
+JOIN book b ON ol.book_id = b.book_id;
+
