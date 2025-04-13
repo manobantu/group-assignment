@@ -1,281 +1,277 @@
--- 1. Create the Database and Select It
-CREATE DATABASE IF NOT EXISTS bookstore;
-USE bookstore;
+--Create Database
 
--- 2. Geographic and Status Tables
-CREATE TABLE country (
-    country_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+create database book_store;
+
+--Create country table
+
+create table country(
+country_id int auto_increment primary key,
+country_name varchar(100) not null
 );
 
-CREATE TABLE address_status (
-    address_status_id INT AUTO_INCREMENT PRIMARY KEY,
-    status_description VARCHAR(50) NOT NULL
+--Create table address_status
+
+create table address_status(
+address_status_id int auto_increment primary key,
+address_status_name varchar(100) not null
 );
 
--- 3. Address and Customer Setup
-CREATE TABLE address (
-    address_id INT AUTO_INCREMENT PRIMARY KEY,
-    address_line1 VARCHAR(255) NOT NULL,
-    address_line2 VARCHAR(255),
-    city VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20),
-    country_id INT,
-    address_status_id INT,
-    FOREIGN KEY (country_id) REFERENCES country(country_id),
-    FOREIGN KEY (address_status_id) REFERENCES address_status(address_status_id)
+--Create table address
+
+create table address(
+address_id int auto_increment primary key,
+address_line1 varchar(100) not null,
+address_line2 varchar(100) not null,
+country_id int not null,
+foreign key (country_id) references country(country_id)
 );
 
-CREATE TABLE customer (
-    customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(20)
+--Create table language
+
+create table languages (
+language_id int not null auto_increment primary key, 
+language_code char(2) not null,
+language_name varchar(50) not null
 );
 
-CREATE TABLE customer_address (
-    customer_address_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT NOT NULL,
-    address_id INT NOT NULL,
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
-    FOREIGN KEY (address_id) REFERENCES address(address_id)
+--Create table publisher
+
+create table publisher(
+publisher_id int auto_increment primary key,
+publisher_name varchar(100) not null
 );
 
--- 4. Publisher and Language Lookup Tables
-CREATE TABLE publisher (
-    publisher_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    country_id INT,
-    FOREIGN KEY (country_id) REFERENCES country(country_id)
+--Create table author
+
+create table author(
+author_id int auto_increment primary key,
+author_name varchar(100) not null
 );
 
-CREATE TABLE book_language (
-    language_id INT AUTO_INCREMENT PRIMARY KEY,
-    language_name VARCHAR(50) NOT NULL
+--Create table book
+
+create table book(
+book_id int auto_increment primary key,
+title varchar(100) not null,
+publisher_id int not null,
+foreign key (publisher_id) references publisher(publisher_id)
 );
 
--- 5. Book and Author Entities with Their Relationship
-CREATE TABLE book (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    isbn VARCHAR(20) UNIQUE,
-    publication_year YEAR,
-    language_id INT,
-    publisher_id INT,
-    FOREIGN KEY (language_id) REFERENCES book_language(language_id),
-    FOREIGN KEY (publisher_id) REFERENCES publisher(publisher_id)
+
+--Create table book_language
+
+create table book_language(
+book_id int not null,
+language_id int not null,
+foreign key (book_id) references book(book_id),
+foreign key (language_id) references language(language_id)
 );
 
-CREATE TABLE author (
-    author_id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    bio TEXT
+--Create table book_author
+
+create table book_author(
+book_id int not null,
+author_id int not null,
+primary key (book_id, author_id),
+foreign key (book_id) references book(book_id),
+foreign key (author_id) references author(author_id)
 );
 
-CREATE TABLE book_author (
-    book_id INT NOT NULL,
-    author_id INT NOT NULL,
-    PRIMARY KEY (book_id, author_id),
-    FOREIGN KEY (book_id) REFERENCES book(book_id),
-    FOREIGN KEY (author_id) REFERENCES author(author_id)
+--Create table customer
+
+create table customers(
+customer_id int not null auto_increment primary key,
+first_name varchar(50) not null,
+last_name varchar(50) not null,
+email varchar(100) not null
 );
 
--- 6. Order, Shipping, and Related Tables
-CREATE TABLE order_status (
-    order_status_id INT AUTO_INCREMENT PRIMARY KEY,
-    status_name VARCHAR(50) NOT NULL
+--Create table customer_address
+
+create table customer_address(
+customer_id int not null,
+address_id int not null,
+address_status_id int not null,
+primary key (customer_id, address_id),
+foreign key (customer_id) references customers(customer_id),
+foreign key (address_id) references address(address_id),
+foreign key (address_status_id) references address_status(address_status_id)
 );
 
-CREATE TABLE shipping_method (
-    shipping_method_id INT AUTO_INCREMENT PRIMARY KEY,
-    method_name VARCHAR(100) NOT NULL,
-    cost DECIMAL(8,2)
+--Create table shipping_method
+
+create table shipping_method(
+method_id int not null auto_increment primary key,
+method_name varchar(100) not null,
+cost decimal(8,2) not null
 );
 
-CREATE TABLE cust_order (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT NOT NULL,
-    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    shipping_method_id INT,
-    order_status_id INT,
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
-    FOREIGN KEY (shipping_method_id) REFERENCES shipping_method(shipping_method_id),
-    FOREIGN KEY (order_status_id) REFERENCES order_status(order_status_id)
+--Create table order_status
+
+create table order_status(
+status_id int not null auto_increment primary key,
+status_value varchar(20) not null
 );
 
-CREATE TABLE order_line (
-    order_line_id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    book_id INT NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
-    price DECIMAL(8,2) NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES cust_order(order_id),
-    FOREIGN KEY (book_id) REFERENCES book(book_id)
+create table order_history(
+history_id int not null primary key,
+order_value VARCHAR(50) not null
 );
 
-CREATE TABLE order_history (
-    history_id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    order_status_id INT NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    remark VARCHAR(255),
-    FOREIGN KEY (order_id) REFERENCES cust_order(order_id),
-    FOREIGN KEY (order_status_id) REFERENCES order_status(order_status_id)
+--Create table orders
+create table orders (
+order_id int primary KEY not null,
+customer_id int not null,
+order_date date not null,
+total_amount decimal(10, 2) not null
 );
 
--- 7. Managing Users and Access Control
-CREATE USER 'store_user'@'%' IDENTIFIED BY 'Group_Assignment_Password1';
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON bookstore.* TO 'store_user'@'%';
+--Create table orders
 
+CREATE TABLE orders (
+order_id INT PRIMARY KEY not null,
+method_id INT not null,
+status_id int not null,
+history_id INT not null,
+order_date DATE not null,
+total_amount DECIMAL(10, 2) not null,
+foreign key (method_id) references shipping_method(method_id),
+foreign key (status_id) references order_status(status_id),
+foreign key (history_id) references order_history(history_id)
+);
+
+--Create customers_orders
+
+create table customers_orders(
+cust_order_id int primary key auto_increment,
+customer_id int not null,
+order_id int not null,
+foreign key (customer_id) references customers(customer_id),
+foreign key (order_id) references orders(order_id)
+);
+
+--Create table order_line
+
+create table order_line(
+line_id int AUTO_INCREMENT primary key,
+cust_order_id int not null,
+book_id int not null,
+price decimal(10,2) not null,
+foreign key (cust_order_id) references customers_orders(cust_order_id),
+foreign key (book_id) references book(book_id)
+);
+
+
+--Inserting data
+
+INSERT INTO country (country_name) VALUES
+('South Africa'),
+('Kenya'),
+('Ghana'),
+('Nigeria');
+
+
+INSERT INTO address_status (address_status_name) VALUES
+('Home'),
+('Billing'),
+('Shipping');
+
+INSERT INTO address (address_line1, address_line2, country_id) VALUES
+('123 Main St', 'Apt 4B', 1),
+('456 Oak Ave', 'Suite 22', 2),
+('789 Elm Rd', 'Unit 3', 3);
+
+INSERT INTO author (author_name) VALUES
+('George Orwell'),
+('Paulo Coelho'),
+('F. Scott Fitzgerald');
+
+INSERT INTO book (title, publisher_id) VALUES
+('1984', 1),
+('The Alchemist', 2),
+('The Great Gatsby', 3);
+
+INSERT INTO book_languages (book_id, language_id) VALUES
+(1, 1),  -- 1984 - English
+(2, 2),  -- The Alchemist - Spanish
+(3, 1),  -- The Great Gatsby - English
+(3, 3);  -- The Great Gatsby - French
+
+
+INSERT INTO book_author (book_id, author_id) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
+
+INSERT INTO customers (first_name, last_name, email) VALUES
+('Alice', 'Smith', 'alice@example.com'),
+('Steve', 'James', 'steve@example.com'),
+('Bob', 'Johnson', 'bob@example.com');
+
+INSERT INTO shipping_method (method_name, cost) VALUES
+('Standard Shipping', 5.00),
+('Express Shipping', 10.00);
+
+INSERT INTO order_status (status_value) VALUES
+('Pending'),
+('Shipped'),
+('Delivered');
+
+INSERT INTO order_history (history_id, order_value) VALUES
+(1, 'Created'),
+(2, 'Paid'),
+(3, 'Shipped');
+
+INSERT INTO orders (order_id, method_id, status_id, history_id, order_date, total_amount) VALUES
+(101, 1, 1, 1, '2025-04-10', 19.99),
+(102, 2, 2, 2, '2025-04-11', 39.99);
+
+INSERT INTO customers_orders (customer_id, order_id) VALUES
+(1, 101),
+(2, 102);
+
+INSERT INTO order_line (cust_order_id, book_id, price) VALUES
+(1, 1, 19.99),
+(2, 2, 39.99);
+
+
+-- Role: admin (full access)
+CREATE ROLE 'admin_role';
+
+-- Role: editor (read/write on selected tables)
+CREATE ROLE 'editor_role';
+
+-- Role: viewer (read-only)
+CREATE ROLE 'viewer_role';
+
+-- Admin: Full access to all tables
+GRANT ALL PRIVILEGES ON book_store.* TO 'admin_role';
+
+-- Editor: Read/write access to books, orders, customers
+GRANT SELECT, INSERT, UPDATE, DELETE ON book_store.book TO 'editor_role';
+GRANT SELECT, INSERT, UPDATE, DELETE ON book_store.orders TO 'editor_role';
+GRANT SELECT, INSERT, UPDATE, DELETE ON book_store.customers TO 'editor_role';
+
+-- Viewer: Read-only access to key tables
+GRANT SELECT ON book_store.book TO 'viewer_role';
+GRANT SELECT ON book_store.orders TO 'viewer_role';
+GRANT SELECT ON book_store.customers TO 'viewer_role';
+
+-- Create Users
+CREATE USER 'lithemba'@'localhost' IDENTIFIED BY 'lithembaPassword123';
+CREATE USER 'cecil'@'localhost' IDENTIFIED BY 'cecilPassword123';
+CREATE USER 'odoyo'@'localhost' IDENTIFIED BY 'odoyoPassword123';
+
+-- Assign roles
+GRANT 'admin_role' TO 'lithemba'@'localhost';
+GRANT 'editor_role' TO 'cecil'@'localhost';
+GRANT 'viewer_role' TO 'odoyo'@'localhost';
+
+-- Set default roles (optional but recommended)
+SET DEFAULT ROLE 'admin_role' TO 'lithemba'@'localhost';
+SET DEFAULT ROLE 'editor_role' TO 'cecil'@'localhost';
+SET DEFAULT ROLE 'viewer_role' TO 'odoyo'@'localhost';
+
+-- Apply privilege changes
 FLUSH PRIVILEGES;
-
--- Index on 'title' in the Book table
-CREATE INDEX idx_book_title ON book(title);
-
--- Index on foreign key columns in the Address table
-CREATE INDEX idx_address_country ON address(country_id);
-CREATE INDEX idx_address_status ON address(address_status_id);
-
--- Index on frequently filtered column in the Customer table (if not already constrained by UNIQUE)
-CREATE INDEX idx_customer_email ON customer(email);
-
--- Indexes on the Customer_Address table
-CREATE INDEX idx_customer_address_customer ON customer_address(customer_id);
-CREATE INDEX idx_customer_address_address ON customer_address(address_id);
-
--- Indexes on order date for fast filtering in orders
-CREATE INDEX idx_cust_order_date ON cust_order(order_date);
-
--- Indexes on foreign key columns in Order_Line
-CREATE INDEX idx_order_line_order ON order_line(order_id);
-CREATE INDEX idx_order_line_book ON order_line(book_id);
-
-
-
-
-
-
--- test data and queries
-
--- 1. test data
-
--- Country Table
-INSERT INTO country (name) VALUES 
-('Kenya'), 
-('South Africa'), 
-('Uganda'), 
-('Lesotho');
-
--- Address Status Table
-INSERT INTO address_status (status_description) VALUES 
-('current'), 
-('old');
-
--- Address Table
-INSERT INTO address (address_line1, address_line2, city, postal_code, country_id, address_status_id) VALUES 
-('456 Gikomba Street', NULL, 'Nairobi', '00100', 1, 1),
-('123 Freedom Avenue', 'Suite 10', 'Cape Town', '8000', 2, 1),
-('789 Pearl Lane', NULL, 'Kampala', '25601', 3, 1),
-('10 Independence Road', NULL, 'Maseru', '100', 4, 2);
-
--- Customer Table
-INSERT INTO customer (first_name, last_name, email, phone) VALUES 
-('Linet', 'Otieno', 'linet.otieno@example.com', '0723123456'),
-('Mandla', 'Dlamini', 'mandla.dlamini@example.com', '0734567890'),
-('Ayo', 'Okoth', 'ayo.okoth@example.com', '0711234567');
-
--- Customer Address Table
-INSERT INTO customer_address (customer_id, address_id) VALUES 
-(1, 1),
-(2, 2),
-(3, 3);
-
--- Publisher Table
-INSERT INTO publisher (name, country_id) VALUES 
-('African Tales Publishing', 1),
-('Rainbow Books', 2),
-('Kampala Literature Press', 3);
-
--- Book Language Table
-INSERT INTO book_language (language_name) VALUES 
-('English'), 
-('Swahili'), 
-('Zulu'), 
-('Sesotho');
-
--- Book Table
-INSERT INTO book (title, isbn, publication_year, language_id, publisher_id) VALUES 
-('The Savannah Chronicles', '978-1-60309-452-8', 2022, 1, 1),
-('Exploring Ubuntu', '978-0-545-01022-1', 2021, 3, 2),
-('Journeys in Africa', '978-3-16-148410-0', 2023, 2, 3);
-
--- Author Table
-INSERT INTO author (first_name, last_name, bio) VALUES 
-('Wanjiru', 'Kimani', 'Kenyan writer with a passion for folklore.'),
-('Sipho', 'Nkosi', 'South African author of cultural novels.'),
-('Nakato', 'Kamya', 'Ugandan storyteller and poet.');
-
--- Book_Author Table
-INSERT INTO book_author (book_id, author_id) VALUES 
-(1, 1),
-(2, 2),
-(3, 3);
-
--- Shipping Method Table
-INSERT INTO shipping_method (method_name, cost) VALUES 
-('Standard', 8.00), 
-('Express', 20.00), 
-('Overnight', 35.00);
-
--- Order Status Table
-INSERT INTO order_status (status_name) VALUES 
-('pending'), 
-('shipped'), 
-('delivered'), 
-('cancelled');
-
--- Customer Order Table
-INSERT INTO cust_order (customer_id, shipping_method_id, order_status_id) VALUES 
-(1, 1, 1),
-(2, 2, 3),
-(3, 3, 2);
-
--- Order Line Table
-INSERT INTO order_line (order_id, book_id, quantity, price) VALUES 
-(1, 1, 2, 15.99), 
-(2, 2, 1, 25.50), 
-(3, 3, 1, 30.00);
-
--- Order History Table
-INSERT INTO order_history (order_id, order_status_id, remark) VALUES 
-(1, 1, 'Order placed.'),
-(2, 3, 'Order delivered.'),
-(3, 2, 'Order shipped.');
-
--- 2. Test Queries
-
--- Fetch Books and Their Authors:
-SELECT b.title, CONCAT(a.first_name, ' ', a.last_name) AS author_name
-FROM book b
-JOIN book_author ba ON b.book_id = ba.book_id
-JOIN author a ON ba.author_id = a.author_id;
-
--- List Customer Orders and Total Costs:
-SELECT co.order_id, c.first_name, c.last_name, 
-       SUM(ol.quantity * ol.price) AS total_amount
-FROM cust_order co
-JOIN customer c ON co.customer_id = c.customer_id
-JOIN order_line ol ON co.order_id = ol.order_id
-GROUP BY co.order_id;
-
-
--- Retrieve Customer Addresses with Country Info:
-SELECT c.first_name, c.last_name, 
-       a.address_line1, a.city, cn.name AS country
-FROM customer c
-JOIN customer_address ca ON c.customer_id = ca.customer_id
-JOIN address a ON ca.address_id = a.address_id
-JOIN country cn ON a.country_id = cn.country_id;
