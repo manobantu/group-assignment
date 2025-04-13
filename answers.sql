@@ -278,11 +278,6 @@ FLUSH PRIVILEGES;
 
 
 
-
-
-
-
-
 SELECT
     b.title AS book_title,
     a.author_name,
