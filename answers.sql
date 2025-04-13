@@ -176,7 +176,7 @@ INSERT INTO address_status (status_description) VALUES
 
 -- Address Table
 INSERT INTO address (address_line1, address_line2, city, postal_code, country_id, address_status_id) VALUES 
-('456 Market Street', NULL, 'Nairobi', '00100', 1, 1),
+('456 Gikomba Street', NULL, 'Nairobi', '00100', 1, 1),
 ('123 Freedom Avenue', 'Suite 10', 'Cape Town', '8000', 2, 1),
 ('789 Pearl Lane', NULL, 'Kampala', '25601', 3, 1),
 ('10 Independence Road', NULL, 'Maseru', '100', 4, 2);
@@ -279,6 +279,3 @@ FROM customer c
 JOIN customer_address ca ON c.customer_id = ca.customer_id
 JOIN address a ON ca.address_id = a.address_id
 JOIN country cn ON a.country_id = cn.country_id;
-
-
-
